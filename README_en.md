@@ -1,3 +1,17 @@
+##  About this fork
+
+**PP-OCR Detection Module with Rectified Text Images:** This fork extends the PP-OCR detection module's output by including txt_imgs (rectified image crops of detected text). This modification simplifies the subsequent recognition step, allowing you to feed these preprocessed images directly into your custom text recognition model.
+
+Workflow example:
+```python
+# ...
+for res in output:
+    preprocessed_imgs = res.img['txt_imgs'] # These are the rectified text regions
+    res.txts = custom_rec_model(preprocessed_imgs) # Your custom model takes these as input
+    res.save_to_img("./output/") # Save boxes with your custom texts
+# ...
+```
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/cuicheng01/PaddleX_doc_images/main/images/logo.png" width="735" height ="200" alt="PaddleX" align="middle" />
 </p>

@@ -295,7 +295,7 @@ class ImgMixin:
         raise NotImplementedError
 
     @property
-    def img(self) -> Dict[str, Image.Image]:
+    def img(self) -> Dict[str, Image.Image] | Dict[str, List[Image.Image]]: # <-- Modified this
         """Property to get the image representation of the result.
 
         Returns:
@@ -323,6 +323,7 @@ class ImgMixin:
             stem = fn.stem
             base_save_path = Path(save_path)
             for key in img:
+                if key == 'txt_imgs': continue # <-- Added this
                 save_path = base_save_path / f"{stem}_{key}{suffix}"
                 self._img_writer.write(save_path.as_posix(), img[key], *args, **kwargs)
         else:

@@ -1,3 +1,17 @@
+##  关于此 fork
+
+**带有校正文本图像的 PP-OCR 检测模块**：此 fork 扩展了 PP-OCR 检测模块的输出，添加了 txt_imgs （检测到的文本的校正图像裁剪）。此修改简化了后续的识别步骤，允许您将这些预处理后的图像直接输入到您的自定义文本识别模型中。
+
+工作流程示例：
+```python
+# ...
+for res in output:
+    preprocessed_imgs = res.img['txt_imgs'] # These are the rectified text regions
+    res.txts = custom_rec_model(preprocessed_imgs) # Your custom model takes these as input
+    res.save_to_img("./output/") # Save boxes with your custom texts
+# ...
+```
+
 <p align="center">
   <img src="https://raw.githubusercontent.com/cuicheng01/PaddleX_doc_images/main/images/logo.png" width="735" height ="200" alt="PaddleX" align="middle" />
 </p>

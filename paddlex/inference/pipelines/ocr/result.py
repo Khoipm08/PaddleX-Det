@@ -14,7 +14,7 @@
 
 import math
 import random
-from typing import Dict
+from typing import Dict, List
 
 import numpy as np
 from PIL import Image, ImageDraw
@@ -65,7 +65,59 @@ class OCRResult(BaseCVResult):
 
         return box
 
-    def _to_img(self) -> Dict[str, Image.Image]:
+    def wrap_text_region(self, image_np, detected_polygon_coords) -> None | np.ndarray: # <-- Added this
+        """
+        Performs a perspective transform (wrapping) on a detected quadrilateral text region
+        without fixed scaling, preserving the original approximate dimensions of the polygon.
+
+        Args:
+            image_np (numpy.ndarray): The original image as a NumPy array (BGR format).
+            detected_polygon_coords (list of list of int/float): A list of 4 [x, y] points
+                representing the corners of the detected text polygon.
+                Order is crucial for a good wrap: [top-left, top-right, bottom-right, bottom-left].
+
+        Returns:
+            numpy.ndarray: The wrapped (rectified) text region as a NumPy array (BGR format).
+                        Returns None if an error occurs or polygon is invalid.
+        """
+        if len(detected_polygon_coords) != 4:
+            # print(f"Error: Polygon must have exactly 4 points. Got {len(detected_polygon_coords)}")
+            return None
+
+        # Convert detected polygon coordinates to a NumPy array (float32 is required)
+        src_pts = np.float32(detected_polygon_coords)
+
+        # Calculate approximate width and height based on the polygon's edge lengths
+        # This preserves the aspect ratio and original size of the text region.
+        def distance(p1, p2):
+            return math.sqrt((p2[0] - p1[0])**2 + (p2[1] - p1[1])**2)
+
+        # Assuming points are in top-left, top-right, bottom-right, bottom-left order
+        width_top = distance(src_pts[0], src_pts[1])
+        width_bottom = distance(src_pts[3], src_pts[2])
+        output_width = int(max(width_top, width_bottom))
+
+        height_left = distance(src_pts[0], src_pts[3])
+        height_right = distance(src_pts[1], src_pts[2])
+        output_height = int(max(height_left, height_right))
+
+        # Define the destination points for the unwrapped (flat) image.
+        # These will be a simple rectangle from (0,0) to (output_width-1, output_height-1).
+        dst_pts = np.float32([[0, 0],
+                            [output_width - 1, 0],
+                            [output_width - 1, output_height - 1],
+                            [0, output_height - 1]])
+
+        # Get the perspective transform matrix
+        M = cv2.getPerspectiveTransform(src_pts, dst_pts)
+
+        # Apply the perspective transform
+        wrapped_img = cv2.warpPerspective(image_np, M, (output_width, output_height),
+                                            flags=cv2.INTER_LINEAR,
+                                            borderMode=cv2.BORDER_REPLICATE)
+        return wrapped_img
+
+    def _to_img(self) -> Dict[str, Image.Image] | Dict[str, List[Image.Image]]: # <-- Modified this
         """
         Converts the internal data to a PIL Image with detection and recognition results.
 
@@ -74,6 +126,8 @@ class OCRResult(BaseCVResult):
         """
         boxes = self["rec_polys"]
         txts = self["rec_texts"]
+        if hasattr(self, 'txts'): txts = self.txts
+        assert len(txts) == len(boxes), "The length of your custom text should match the length of the box."
         image = self["doc_preprocessor_res"]["output_img"]
         h, w = image.shape[0:2]
         image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -81,6 +135,7 @@ class OCRResult(BaseCVResult):
         img_right = np.ones((h, w, 3), dtype=np.uint8) * 255
         random.seed(0)
         draw_left = ImageDraw.Draw(img_left)
+        wrapped_imgs = []
         for idx, (box, txt) in enumerate(zip(boxes, txts)):
             try:
                 color = (
@@ -105,6 +160,8 @@ class OCRResult(BaseCVResult):
                 pts = np.array(box, np.int32).reshape((-1, 1, 2))
                 cv2.polylines(img_right_text, [pts], True, color, 1)
                 img_right = cv2.bitwise_and(img_right, img_right_text)
+
+                wrapped_imgs.append(Image.fromarray(self.wrap_text_region(image_rgb, box)))
             except:
                 continue
 
@@ -114,7 +171,7 @@ class OCRResult(BaseCVResult):
         img_show.paste(Image.fromarray(img_right), (w, 0, w * 2, h))
 
         model_settings = self["model_settings"]
-        res_img_dict = {f"ocr_res_img": img_show}
+        res_img_dict = {f"ocr_res_img": img_show, "txt_imgs": wrapped_imgs}
         if model_settings["use_doc_preprocessor"]:
             res_img_dict.update(**self["doc_preprocessor_res"].img)
         return res_img_dict
