@@ -63,7 +63,7 @@ PaddleX 3.0 是基于飞桨框架构建的低代码开发工具，它集成了�
 ## 🛠️ 安装
 
 !!! warning
-    在安装 PaddleX 之前，请确保您已具备基本的 <b>Python 运行环境</b>（注：目前支持 <b>Python 3.8 至 Python 3.12</b>）。PaddleX 3.0 版本依赖的 PaddlePaddle 版本为 <b>3.0.0以上版本</b>。
+    在安装 PaddleX 之前，请确保您已具备基本的 <b>Python 运行环境</b>（注：目前支持 <b>Python 3.8 至 Python 3.12</b>）。PaddleX 3.0-rc1 版本依赖的 PaddlePaddle 版本为 <b>3.0.0以上版本</b>。
 
 ### 安装 PaddlePaddle
 
@@ -88,7 +88,7 @@ PaddleX 3.0 是基于飞桨框架构建的低代码开发工具，它集成了�
 ### 安装PaddleX
 
 ```bash
-pip install paddlex[base]==3.0.1
+pip install paddlex[base]==3.0.0
 ```
 
 > ❗ 更多安装方式参考 [PaddleX 安装教程](https://paddlepaddle.github.io/PaddleX/latest/installation/installation.html)
