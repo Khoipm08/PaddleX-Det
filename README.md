@@ -6,9 +6,9 @@
 ```python
 # ...
 for res in output:
-    preprocessed_imgs = res.img['txt_imgs'] # These are the rectified text regions
-    res.txts = custom_rec_model(preprocessed_imgs) # Your custom model takes these as input
-    res.save_to_img("./output/") # Save boxes with your custom texts
+    preprocessed_imgs = res.img['txt_imgs'] # 这些是经过校正的文本区域
+    res.txts = custom_rec_model(preprocessed_imgs) # 您的自定义模型将这些作为输入
+    res.save_to_img("./output/") # 保存包含自定义文本的框
 # ...
 ```
 
