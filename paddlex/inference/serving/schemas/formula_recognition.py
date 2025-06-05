@@ -34,7 +34,7 @@ class InferRequest(ocr.BaseInferRequest):
     useLayoutDetection: Optional[bool] = None
     useDocOrientationClassify: Optional[bool] = None
     useDocUnwarping: Optional[bool] = None
-    layoutThreshold: Optional[Union[float, dict]] = None
+    layoutThreshold: Optional[float] = None
     layoutNms: Optional[bool] = None
     layoutUnclipRatio: Optional[Union[float, Tuple[float, float]]] = None
     layoutMergeBboxesMode: Optional[str] = None
