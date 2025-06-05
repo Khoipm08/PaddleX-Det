@@ -579,9 +579,9 @@
       "paddle"
     ],
     "PP-OCRv4_server_det": [
-      "paddle",
       "openvino",
-      "onnxruntime"
+      "onnxruntime",
+      "paddle"
     ],
     "PP-OCRv3_mobile_rec": [
       "openvino",

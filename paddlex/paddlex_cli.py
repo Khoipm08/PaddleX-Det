@@ -244,12 +244,7 @@ def install(args):
         if device_type == "cpu":
             package = "ultra-infer-python"
         elif device_type == "gpu":
-            cuda_version = get_paddle_cuda_version()
-            if not cuda_version:
-                sys.exit(
-                    "No CUDA version found. Please make sure you have installed PaddlePaddle with CUDA enabled."
-                )
-            if cuda_version[0] != 11:
+            if get_paddle_cuda_version()[0] != 11:
                 sys.exit(
                     "You are not using PaddlePaddle compiled with CUDA 11. Currently, CUDA versions other than 11.x are not supported by the high-performance inference plugin."
                 )
